@@ -1,0 +1,81 @@
+public class VectorField {
+
+
+    private static final int _w = 2;
+    private static final int _h = 2;
+    private Vector2 transform;
+    private Vector2[][] field;
+
+    VectorField() {
+        field = new Vector2[_h][_w];
+
+        for (int y = 0; y < _h; y++) {
+            for (int x = 0; x < _w; x++) {
+                
+            }
+        }
+
+        field[0][0] = new Vector2(1, 0);
+        field[0][1] = new Vector2(0, 1);
+        field[1][0] = new Vector2(0, -1);
+        field[1][1] = new Vector2(-1, 0);
+
+        transform = new Vector2((float)_w / (float)Map.width, (float)_h / (float)Map.height);
+    }
+
+    private Vector2 select(Vector2 tPos) {
+        int y = (int)Math.floor(tPos.y);
+        int x = (int)Math.floor(tPos.x);
+
+        x = Utils.clamp(x, 0, _w - 1);
+        y = Utils.clamp(y, 0, _h - 1);
+
+        return field[y][x].clone();
+    }
+
+    public Vector2 f(Vector2 pos) {
+        Vector2 tPos;
+        
+        tPos = transform.clone();
+        tPos.multiply(pos);
+        
+        return select(tPos);
+    }
+
+    public void drawRect(Vector2 pos, Vector2 size) {
+        line(pos.x, pos.y, pos.x + size.x, pos.y);
+        line(pos.x + size.x, pos.y, pos.x + size.x, pos.y + size.y);
+        line(pos.x + size.x, pos.y + size.y, pos.x, pos.y + size.y);
+        line(pos.x, pos.y + size.y, pos.x, pos.y);
+    }
+
+    public void draw() {
+        Vector2 size;
+        float r, min;
+
+        size = new Vector2(1 / transform.x, 1 / transform.y);
+        stroke(255, 150, 0);
+        min = Math.min(size.x, size.y);
+        r = min * 0.04;
+
+        for (int y = 0; y < _h; y++) {
+            for (int x = 0; x < _w; x++) {
+                Vector2 pos = new Vector2(x * size.x, y * size.y);
+                drawRect(pos, size);
+                
+                Vector2 dot = field[y][x].clone();
+                dot.multiply(min);
+                pos.x = pos.x + size.x / 2.0;
+                pos.y = pos.y + size.y / 2.0;
+
+                dot.add(pos);
+
+                noFill();
+                ellipseMode(CENTER);
+                ellipse(pos.x, pos.y, min, min);
+                ellipse(dot.x, dot.y, r, r);
+            }
+        }
+
+    }
+}

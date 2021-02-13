@@ -1,0 +1,201 @@
+public class VectorField {
+
+    private static final float PIXEL = -1;
+    private static final float UNVISITED = 0;
+
+    private static final float diagonal = 1.41421356237;
+    private static final float baseForce = 0.8;
+    private Vector2 transform;
+    private Vector2[][] field;
+
+    private int _w = 50;
+    private int _h = 25;
+
+    public boolean drawMode;
+
+    private float[][] map;
+
+    VectorField() {
+
+        try {
+            File myObj = new File("./vobrazok.bw");
+            Scanner scanner = new Scanner(myObj);
+            String row = "";
+            int lines = 0;
+
+            while (scanner.hasNextLine()) {
+                lines++;
+                row = scanner.nextLine();
+            }
+            _w = row.split(",").length;
+            _h = lines;
+            field = new Vector2[_h][_w];
+            map = new float[_h][_w];
+
+            scanner.close();
+
+            lines = 0;
+            scanner = new Scanner(myObj);
+            while (scanner.hasNextLine()) {
+                row = scanner.nextLine();
+                String[] args = row.split(",");
+
+                for (int x = 0; x < args.length; x++) {
+                    map[lines][x] = Float.parseFloat(args[x]);
+                }
+                lines++;
+            }
+            scanner.close();
+
+            createField();
+
+        } catch (FileNotFoundException e) {
+            drawMode = true;
+            field = new Vector2[_h][_w];
+            map = new float[_h][_w];
+        }
+
+        transform = new Vector2((float)_w / (float)Map.width, (float)_h / (float)Map.height);
+    }
+
+    public void createField() {
+        drawMode = false;
+
+        for (int y = 0; y < _h; y++) {
+            for (int x = 0; x < _w; x++) {
+                if (map[y][x] == PIXEL) {
+                    field[y][x] = new Vector2(0, 0);
+                    spread(x, y, 0, 0, 0);
+                }
+            }
+        }
+    }
+
+    public void saveField() {
+    }
+
+    public int[] getCoords(Vector2 pos) {
+        Vector2 tPos;
+        tPos = transform.clone();
+        tPos.multiply(pos);
+
+        int y = (int)Math.floor(tPos.y);
+        int x = (int)Math.floor(tPos.x);
+
+        x = Utils.clamp(x, 0, _w - 1);
+        y = Utils.clamp(y, 0, _h - 1);
+
+        int[] coords = new int[2];
+        coords[0] = x;
+        coords[1] = y;
+
+        return coords;
+    }
+
+    public void setPixel(Vector2 mouse) {
+        int[] coords;
+
+        coords = getCoords(mouse);
+
+        map[coords[1]][coords[0]] = PIXEL;
+    }
+
+    public void removePixel(Vector2 mouse) {
+        int[] coords;
+
+        coords = getCoords(mouse);
+
+        map[coords[1]][coords[0]] = UNVISITED;
+    }
+
+    private void spread(int x, int y, int xFrom, int yFrom, float level) {
+        apply(x + 1, y, x, y, level + 1);
+        apply(x - 1, y, x, y, level + 1);
+        apply(x, y + 1, x, y, level + 1);
+        apply(x, y - 1, x, y, level + 1);
+
+        apply(x + 1, y - 1, x, y, level + diagonal);
+        apply(x + 1, y + 1, x, y, level + diagonal);
+        apply(x - 1, y - 1, x, y, level + diagonal);
+        apply(x - 1, y + 1, x, y, level + diagonal);
+    }
+
+    private void apply(int x, int y, int xFrom, int yFrom, float level) {
+        if (x >= _w || x < 0 || y >= _h || y < 0) {
+            return;
+        }
+
+        float v = map[y][x];
+
+        if (v == PIXEL) {
+            return;
+        }
+
+        if (v != UNVISITED && level >= v) {
+            return;
+        }
+
+        Vector2 force = new Vector2(xFrom - x, yFrom - y);
+        force.multiply(baseForce * level / force.getLength());
+        
+        map[y][x] = level;
+        field[y][x] = force;
+    
+        spread(x, y, xFrom, yFrom, level);
+    }
+
+    public Vector2 f(Vector2 pos) {
+        int[] coords;
+
+        coords = getCoords(pos);
+        
+        return field[
+            coords[1]
+        ][
+            coords[0]
+        ].clone();
+    }
+
+    public void drawRect(Vector2 pos, Vector2 size) {
+        line(pos.x, pos.y, pos.x + size.x, pos.y);
+        line(pos.x + size.x, pos.y, pos.x + size.x, pos.y + size.y);
+        line(pos.x + size.x, pos.y + size.y, pos.x, pos.y + size.y);
+        line(pos.x, pos.y + size.y, pos.x, pos.y);
+    }
+
+    public void draw() {
+        Vector2 size;
+        float r, min;
+
+        if (!drawMode) return;
+
+        size = new Vector2(1 / transform.x, 1 / transform.y);
+        stroke(255, 150, 0);
+        min = Math.min(size.x / 2, size.y / 2);
+        r = min * 0.14;
+
+        for (int y = 0; y < _h; y++) {
+            for (int x = 0; x < _w; x++) {
+                Vector2 pos = new Vector2(x * size.x, y * size.y);
+                if (map[y][x] == PIXEL) {
+                    rectMode(CORNER); 
+                    fill(255, 150, 0);
+                    rect(pos.x, pos.y, size.x, size.y);
+                } else {
+                    //drawRect(pos, size);
+                }
+                
+                // Vector2 dot = field[y][x].clone();
+                // dot.multiply(min - r * 1.5);
+                // pos.x = pos.x + size.x / 2.0;
+                // pos.y = pos.y + size.y / 2.0;
+
+                // dot.add(pos);
+                // noFill();
+                // ellipseMode(CENTER);
+                // ellipse(dot.x, dot.y, r, r);
+            }
+        }
+
+    }
+}
