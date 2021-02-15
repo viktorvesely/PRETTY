@@ -4,7 +4,10 @@ public class Collision {
 
     private static final float offset = 0;
 
+    private boolean _edge;
+
     Collision() {
+        _edge = false;
     }
 
 
@@ -39,11 +42,15 @@ public class Collision {
     }
 
 
-    
+    public void toggleEdge() {
+        _edge = !_edge;
+    }
 
      public void edge(Entity e) {
         float x, y, nx, ny, vx, vy;
         boolean out;
+
+        if (!_edge) return;
 
         x = e.pos.x;
         y = e.pos.y;

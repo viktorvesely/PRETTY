@@ -12,6 +12,16 @@ public class Particle extends Entity {
         red = 255;//Utils.randInt(30, 255);
         green = 255;//Utils.randInt(30, 255);
         blue = 255;//Utils.randInt(30, 255);
+
+        if (pos.x < Map.width / 2) {
+            pos.x -= Map.width;
+        } else {
+            
+        }
+
+        pos.x = pos.x < Map.width / 2 ? pos.x - Map.width : pos.x + Map.width; 
+        pos.y = pos.y < Map.height / 2 ? pos.y - Map.height : pos.y + Map.height; 
+
     }
 
     public void act(Vector2 force) {

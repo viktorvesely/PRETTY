@@ -39,7 +39,7 @@ void setup() {
     addEnt(new Particle());
   }
 
-  //vectorField = new VectorField("vnutro", "lebka");
+  //vectorField = new VectorField("pov", "pov");
   vectorField = new VectorField();
   //vectorField = new VectorField(Map.dW, Map.dH, "vege");
   keyboard = new Keyboard();
@@ -97,18 +97,32 @@ void applyVectorField(Entity entity) {
   entity.act(force);
 }
 
-boolean g_temp = false;
+boolean g_j = false;
+boolean g_e = false;
+boolean g_p = false;
+
+boolean g_pause = true;
 
 void update() {
 
-  if (checkKey((int)'j') && !g_temp) {
+  if (checkKey((int)'j') && !g_j) {
 
     vectorField.shuffle().nextFrame();
 
-    g_temp = true;
+    g_j = true;
   } else if (!checkKey((int)'j')) {
-    g_temp = false;
+    g_j = false;
   }
+
+  if (checkKey((int)'e') && !g_e) {
+
+    collision.toggleEdge();
+
+    g_e = true;
+  } else if (!checkKey((int)'e')) {
+    g_e = false;
+  }
+
 
   for (int i = 0; i < entities.size(); i++) {
     Entity e = entities.get(i);
@@ -146,6 +160,17 @@ void drawMode() {
 void draw() {
   background(0, 0, 0);
 
+  if (checkKey((int)'p') && !g_p) {
+
+    g_pause = !g_pause;
+
+    g_p = true;
+  } else if (!checkKey((int)'p')) {
+    g_p = false;
+  }
+
+  if (g_pause) return;
+
   if (vectorField.drawMode) {
     drawMode();
   }
@@ -153,6 +178,5 @@ void draw() {
     update();
   }
 
-  
   //fx.render().rgbSplit(250).bloom(0.6, 20, 40).compose();
 }

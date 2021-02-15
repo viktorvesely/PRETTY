@@ -42,7 +42,7 @@ public class VectorField {
 
         Frame frame = new Frame("kek");
         frames.add(frame);
-        frame = new Frame("moon");
+        frame = new Frame("pov");
         frames.add(frame);
         currentFrame = 0;
     }

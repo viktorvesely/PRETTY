@@ -1,7 +1,7 @@
 import imageio
 
 path = "./maps/"
-name = "vnutro"
+name = "pov"
 
 def f(extension):
     return path + name + "." + extension
